@@ -1,6 +1,6 @@
 ---
 title: "Coding workshop: Week 10"
-author: "your name here"
+author: "Veronique Letourneau"
 format:
   html:
     toc: true
@@ -32,7 +32,7 @@ library(skimr)
 library(GGally)
 library(flextable)
 
-salamanders <- read_csv(here("data", "salamanders.csv"))
+salamanders <- read_csv(here("data", "Salamanders.csv"))
 ```
 
 # Data info from `glmmTMB`:
@@ -47,24 +47,28 @@ salamanders <- read_csv(here("data", "salamanders.csv"))
 `spp`: abbreviated species name, possibly also life stage  
 `count`: number of salamanders observed  
 
+scaled variables: helpful for very different numbers, like temperature and days 
+of the year (mean of continuous ans shifting variables on to the center *of the mean*)
+
 # Explore the data set:
 
 ## histogram of counts:
 
 ```{r histogram}
-
+ggplot(data = salamanders, aes(x = count)) +
+  geom_histogram(bins = 17)
 ```
 
 ## Missingness:
 
 ```{r missingness}
-
+gg_miss_var(salamanders)
 ```
 
 ## Skim: 
 
 ```{r skim-dataset}
-
+skim(salamanders)
 ```
 
 ## Pairs plot:  
@@ -75,7 +79,10 @@ salamanders <- read_csv(here("data", "salamanders.csv"))
 #| out.width: 90%
 #| fig.align: center
 
-
+salamanders %>% 
+  # taking out the site column
+  select(!site) %>% 
+  ggpairs
 ```
 
 # Question: How does salamander count vary with mined status, species, and stream cover?
@@ -83,14 +90,14 @@ salamanders <- read_csv(here("data", "salamanders.csv"))
 ## Build models
 
 ```{r models}
-# linear model, we know this is wrong
+# linear model, we know this is wrong (count as response not good for linear) 
+salmod1 <- lm(count ~ cover + mined + spp, data = salamanders)
 
+# generalized linear model with Poisson distribution *mean and variance are the same*
+salmod2 <- glm(count ~ cover + mined + spp, data = salamanders, family = "poisson")
 
-# generalized linear model with Poisson distribution
-
-
-# generalized linear model with negative binomial distribution
-
+# generalized linear model with negative binomial distribution (no family, glm.nb = negative binomial). *good for over-dispersion*
+salmod3 <- glm.nb(count ~ cover + mined + spp, data = salamanders)
 
 # generalized linear model with Poisson distribution and random effect of site
 
@@ -107,36 +114,45 @@ salamanders <- read_csv(here("data", "salamanders.csv"))
 #| fig.align: center
 
 # check diagnostics
-
+simulateResiduals(salmod1, plot = TRUE)
+simulateResiduals(salmod2, plot = TRUE)
+simulateResiduals(salmod3, plot = TRUE)
 ```
 
 ## Which distribution to use?
+Model 3 (generalized linear model with negative binomial distribution), but we can still use model selection to double check (2 ways to choose which distribution to use: looking at diagnostics and model selection)
 
 ```{r choosing-model}
-
+model.sel(salmod1, salmod2, salmod3)
 ```
 
 ## Model summary
 
 ```{r summaries}
 # model object
-
+salmod3
 
 # summary 
-
-
+summary(salmod3)
+# shows that cover is not a significant predictor, count is lower on mined and higher in unmined)
 # confidence intervals
+confint(salmod3)
 
-
-# adjusted R2
-
+# adjusted R2 (only look at delta R2m) *low because we're only looking at 3 predictors*
+r.squaredGLMM(salmod3)
 ```
 
 ```{r}
 # model object in table
-
+salmod3 %>% 
+  as_flextable()
 ```
 
+```{r}
+# another one
+tidy(salmod3) %>% 
+  flextable()
+```
 
 ## Visualizing:
 
@@ -145,7 +161,10 @@ salamanders <- read_csv(here("data", "salamanders.csv"))
 #| fig.height: 10
 #| out.width: 90%
 #| fig.align: center
+plot(ggpredict(salmod3, terms = c("cover", "mined")), add.data = TRUE)
+# shows that cover has no significant effect
 
-
+plot(ggpredict(salmod3, terms = c("cover", "mined", "spp")), add.data = TRUE)
+# shows that species has a significant effect on the number of salamanders, but mined ans unmined still remains the main significance
 ```
 
