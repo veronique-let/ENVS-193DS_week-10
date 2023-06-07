@@ -1,0 +1,151 @@
+---
+title: "Coding workshop: Week 10"
+author: "your name here"
+format:
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+execute:
+  message: false
+  warning: false
+---
+
+```{r set-up}
+# model packages
+library(MASS) # have to read this in before tidyverse 
+library(lme4)
+library(glmmTMB) # ok if you don't have this - just comment it out
+
+# diagnostics and model info
+library(DHARMa)
+library(MuMIn)
+library(ggeffects)
+library(lmtest)
+library(broom)
+
+# general usage
+library(tidyverse)
+library(here)
+library(naniar)
+library(skimr)
+library(GGally)
+library(flextable)
+
+salamanders <- read_csv(here("data", "salamanders.csv"))
+```
+
+# Data info from `glmmTMB`:
+
+`site`: name of a location where repeated samples were taken  
+`mined`: factor indicating whether the site was affected by mountain top removal coal mining  
+`cover`: amount of cover objects in the stream (scaled)  
+`sample`: repeated sample  
+`DOP`: Days since precipitation (scaled)  
+`Wtemp`: water temperature (scaled)  
+`DOY`: day of year (scaled)  
+`spp`: abbreviated species name, possibly also life stage  
+`count`: number of salamanders observed  
+
+# Explore the data set:
+
+## histogram of counts:
+
+```{r histogram}
+
+```
+
+## Missingness:
+
+```{r missingness}
+
+```
+
+## Skim: 
+
+```{r skim-dataset}
+
+```
+
+## Pairs plot:  
+
+```{r pairs-plot}
+#| fig.width: 12
+#| fig.height: 12
+#| out.width: 90%
+#| fig.align: center
+
+
+```
+
+# Question: How does salamander count vary with mined status, species, and stream cover?
+
+## Build models
+
+```{r models}
+# linear model, we know this is wrong
+
+
+# generalized linear model with Poisson distribution
+
+
+# generalized linear model with negative binomial distribution
+
+
+# generalized linear model with Poisson distribution and random effect of site
+
+
+# generalized linear model with negative binomial distribution and random effect of site
+
+```
+
+## Look at residuals
+
+```{r model-residuals}
+#| fig.height: 6
+#| fig.width: 8
+#| fig.align: center
+
+# check diagnostics
+
+```
+
+## Which distribution to use?
+
+```{r choosing-model}
+
+```
+
+## Model summary
+
+```{r summaries}
+# model object
+
+
+# summary 
+
+
+# confidence intervals
+
+
+# adjusted R2
+
+```
+
+```{r}
+# model object in table
+
+```
+
+
+## Visualizing:
+
+```{r visualization}
+#| fig.width: 12
+#| fig.height: 10
+#| out.width: 90%
+#| fig.align: center
+
+
+```
+
